@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project Name="Bottle Filling Line">
+  <Device Name="MainPLC">
+    <Task Name="FastTask">
+      <Program Name="ConveyorControl" />
+      <FunctionBlock Name="PumpManager" />
+      <FunctionBlock Name="FillingValveController" />
+    </Task>
+    <Module Name="AlarmManager" />
+  </Device>
+</Project>

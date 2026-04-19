@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "default": {
+      "format": "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+    },
+    "access": {
+      "format": "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+    }
+  },
+  "handlers": {
+    "error_file": {
+      "class": "logging.FileHandler",
+      "level": "INFO",
+      "formatter": "default",
+      "filename": "D:/work/PLC auto testing/logs/server-live.log",
+      "mode": "a",
+      "encoding": "utf-8"
+    },
+    "access_file": {
+      "class": "logging.FileHandler",
+      "level": "INFO",
+      "formatter": "access",
+      "filename": "D:/work/PLC auto testing/logs/server-access.log",
+      "mode": "a",
+      "encoding": "utf-8"
+    }
+  },
+  "loggers": {
+    "uvicorn": {
+      "handlers": ["error_file"],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn.error": {
+      "handlers": ["error_file"],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn.access": {
+      "handlers": ["access_file"],
+      "level": "INFO",
+      "propagate": false
+    }
+  },
+  "root": {
+    "handlers": ["error_file"],
+    "level": "INFO"
+  }
+}

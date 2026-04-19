@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CODESYS Documentation Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="ambient"></div>
+  <main class="layout">
+    <section class="hero card">
+      <p class="eyebrow">Industrial Automation Toolkit</p>
+      <h1>CODESYS XML Documentation Agent</h1>
+      <p class="lead">
+        Upload a CODESYS XML export and generate system overview plus detailed code documentation in Markdown, HTML, and DOCX.
+      </p>
+    </section>
+
+    <section class="uploader card">
+      <form id="upload-form" novalidate>
+        <label class="field">
+          <span>XML File</span>
+          <input id="xml-file" name="file" type="file" accept=".xml,text/xml" required />
+        </label>
+
+        <fieldset class="formats">
+          <legend>Output Formats</legend>
+          <label><input type="checkbox" name="format" value="markdown" checked /> Markdown</label>
+          <label><input type="checkbox" name="format" value="html" checked /> HTML</label>
+          <label><input type="checkbox" name="format" value="docx" checked /> DOCX</label>
+        </fieldset>
+
+        <fieldset class="formats">
+          <legend>Documentation Depth</legend>
+          <label><input type="radio" name="detail-level" value="basic" /> Basic</label>
+          <label><input type="radio" name="detail-level" value="standard" /> Standard</label>
+          <label><input type="radio" name="detail-level" value="deep" checked /> Deep</label>
+          <label><input type="radio" name="detail-level" value="comprehensive" /> Comprehensive</label>
+        </fieldset>
+
+        <fieldset class="formats">
+          <legend>Additional Options</legend>
+          <label><input type="checkbox" name="include-diagrams" checked /> Generate flow and logic diagrams</label>
+        </fieldset>
+
+        <button id="submit-button" type="submit">Generate Documentation</button>
+      </form>
+
+      <p id="status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section id="result-card" class="result card hidden">
+      <h2>Generation Result</h2>
+      <div id="result-meta"></div>
+      <h3>Artifacts</h3>
+      <ul id="artifact-list"></ul>
+      <div id="warning-block" class="warnings hidden">
+        <h3>Warnings</h3>
+        <ul id="warning-list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

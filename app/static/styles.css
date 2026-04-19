@@ -1,0 +1,194 @@
+:root {
+  --bg-top: #f7f3e8;
+  --bg-bottom: #e8f1f5;
+  --card: rgba(255, 255, 255, 0.84);
+  --text: #13222d;
+  --muted: #446272;
+  --accent: #cf5f2f;
+  --accent-strong: #a9461f;
+  --line: rgba(19, 34, 45, 0.14);
+  --success: #1f7a46;
+  --error: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+}
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(207, 95, 47, 0.25), transparent 30%),
+    radial-gradient(circle at 84% 72%, rgba(19, 34, 45, 0.12), transparent 34%);
+}
+
+.layout {
+  position: relative;
+  z-index: 1;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem 1rem 2.5rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  backdrop-filter: blur(6px);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 16px 50px rgba(17, 24, 39, 0.08);
+  transform: translateY(0);
+  animation: card-in 420ms ease both;
+}
+
+.hero h1 {
+  margin: 0.25rem 0 0.5rem;
+  line-height: 1.15;
+  font-size: clamp(1.55rem, 3.6vw, 2.4rem);
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.lead {
+  margin: 0;
+  color: var(--muted);
+  max-width: 72ch;
+}
+
+.field,
+.formats {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.95rem;
+}
+
+.field span,
+.formats legend {
+  font-weight: 600;
+}
+
+input[type="file"] {
+  width: 100%;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.formats {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.formats label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  color: #fff;
+  background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.status {
+  margin: 0.25rem 0 0;
+  min-height: 1.3rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.85rem;
+}
+
+.status[data-tone="success"] {
+  color: var(--success);
+}
+
+.status[data-tone="error"] {
+  color: var(--error);
+}
+
+.status[data-tone="working"] {
+  color: var(--muted);
+}
+
+.result h2,
+.result h3 {
+  margin-top: 0;
+}
+
+.result ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.result a {
+  color: #0f5e8a;
+}
+
+.warnings {
+  margin-top: 1rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.85rem;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .layout {
+    padding: 1rem 0.75rem 1.5rem;
+  }
+
+  .card {
+    border-radius: 14px;
+    padding: 1rem;
+  }
+}

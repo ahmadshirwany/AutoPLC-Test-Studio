@@ -1,0 +1,10 @@
+The AI agent allows users to upload an XML file exported from a CODESYS project directly through the browser. Once the file is provided, the agent processes the XML and leverages the Gemini model to automatically generate comprehensive project documentation.
+
+The agent produces structured outputs, including:
+
+A system overview document that explains the overall logic, architecture, and workflow of the project.
+A detailed code documentation file that analyzes the codebase and explains the functionality of each component, module, and logic block.
+
+All generated documents are automatically organized and saved in a dedicated folder. The folder is intelligently named based on the project’s purpose or detected functionality, ensuring clarity and easy management.
+
+This tool is designed to simplify understanding, maintenance, and onboarding for complex industrial automation projects developed in CODESYS.

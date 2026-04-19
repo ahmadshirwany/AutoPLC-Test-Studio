@@ -1,0 +1,377 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://www.plcopen.org/xml/tc6_0200">
+  <fileHeader companyName="" productName="CODESYS" productVersion="CODESYS V3.5 SP21 Patch 3" creationDateTime="2026-04-17T12:04:32.9281113" />
+  <contentHeader name="Untitled1.project" modificationDateTime="2025-11-16T13:06:54.2743497">
+    <coordinateInfo>
+      <fbd>
+        <scaling x="1" y="1" />
+      </fbd>
+      <ld>
+        <scaling x="1" y="1" />
+      </ld>
+      <sfc>
+        <scaling x="1" y="1" />
+      </sfc>
+    </coordinateInfo>
+    <addData>
+      <data name="http://www.3s-software.com/plcopenxml/projectinformation" handleUnknown="implementation">
+        <ProjectInformation />
+      </data>
+    </addData>
+  </contentHeader>
+  <types>
+    <dataTypes />
+    <pous />
+  </types>
+  <instances>
+    <configurations>
+      <configuration name="Device">
+        <resource name="Application">
+          <task name="MainTask" interval="PT0.02S" priority="1">
+            <pouInstance name="PLC_PRG" typeName="">
+              <documentation>
+                <xhtml xmlns="http://www.w3.org/1999/xhtml" />
+              </documentation>
+            </pouInstance>
+            <addData>
+              <data name="http://www.3s-software.com/plcopenxml/tasksettings" handleUnknown="implementation">
+                <TaskSettings KindOfTask="Cyclic" Interval="t#20ms" IntervalUnit="ms" WithinSPSTimeSlicing="true">
+                  <Watchdog Enabled="false" TimeUnit="ms" Sensitivity="1" />
+                </TaskSettings>
+              </data>
+              <data name="http://www.3s-software.com/plcopenxml/objectid" handleUnknown="discard">
+                <ObjectId>37491117-16c6-473d-bd44-c46301e7978c</ObjectId>
+              </data>
+            </addData>
+          </task>
+          <globalVars name="GVL">
+            <variable name="SystemStart">
+              <type>
+                <BOOL />
+              </type>
+              <initialValue>
+                <simpleValue value="FALSE" />
+              </initialValue>
+            </variable>
+            <variable name="AutoMode">
+              <type>
+                <BOOL />
+              </type>
+              <initialValue>
+                <simpleValue value="TRUE" />
+              </initialValue>
+            </variable>
+            <variable name="PumpCoil">
+              <type>
+                <BOOL />
+              </type>
+              <initialValue>
+                <simpleValue value="FALSE" />
+              </initialValue>
+            </variable>
+            <variable name="DischargeVlve">
+              <type>
+                <BOOL />
+              </type>
+              <initialValue>
+                <simpleValue value="TRUE" />
+              </initialValue>
+            </variable>
+            <variable name="Level_PV">
+              <type>
+                <REAL />
+              </type>
+              <initialValue>
+                <simpleValue value="0.0" />
+              </initialValue>
+            </variable>
+            <variable name="Level_Sp">
+              <type>
+                <REAL />
+              </type>
+              <initialValue>
+                <simpleValue value="50" />
+              </initialValue>
+            </variable>
+            <variable name="Hyst">
+              <type>
+                <REAL />
+              </type>
+              <initialValue>
+                <simpleValue value="2.0" />
+              </initialValue>
+            </variable>
+            <variable name="ResetSystem">
+              <type>
+                <BOOL />
+              </type>
+            </variable>
+            <addData>
+              <data name="http://www.3s-software.com/plcopenxml/attributes" handleUnknown="implementation">
+                <Attributes>
+                  <Attribute Name="qualified_only" Value="" />
+                </Attributes>
+              </data>
+              <data name="http://www.3s-software.com/plcopenxml/objectid" handleUnknown="discard">
+                <ObjectId>a684c113-33eb-437c-9fd6-a2abbc8496c4</ObjectId>
+              </data>
+            </addData>
+          </globalVars>
+          <addData>
+            <data name="http://www.3s-software.com/plcopenxml/pou" handleUnknown="implementation">
+              <pou name="PLC_PRG" pouType="program">
+                <interface>
+                  <localVars>
+                    <variable name="Level_Sim01">
+                      <type>
+                        <derived name="Level_Sim" />
+                      </type>
+                    </variable>
+                    <variable name="OnOff_cont_01">
+                      <type>
+                        <derived name="OnOff_Control" />
+                      </type>
+                    </variable>
+                    <variable name="Reset_Trig">
+                      <type>
+                        <derived name="R_TRIG" />
+                      </type>
+                    </variable>
+                  </localVars>
+                </interface>
+                <body>
+                  <ST>
+                    <xhtml xmlns="http://www.w3.org/1999/xhtml">Reset_Trig(CLK := GVL.ResetSystem);
+IF Reset_Trig.Q THEN
+    // Reset all process vars to initial states
+    GVL.Level_PV := 0.0;          // Tank empty
+    GVL.Level_Sp := 50.0;         // Default setpoint
+    GVL.Hyst := 2.0;              // Default hysteresis
+    GVL.PumpCoil := FALSE;        // Pump off
+    GVL.DischargeVlve := FALSE;   // Valve closed (no drain)
+    GVL.AutoMode := FALSE;        // Start in manual
+    GVL.SystemStart := FALSE;     // Stop system
+	GVl.ResetSystem := False;
+    
+    // Optional: Reset internal FB states (if needed)
+    // Level_Sim01.Level := 0.0;  // But Level is OUTPUT—handled via PV above
+    // For deeper reset, call a custom Reset method in FBs (see Step 3)
+END_IF;
+IF GVL.SystemStart THEN
+	GVL.DischargeVlve := TRUE;
+	Level_Sim01(Charge:=GVL.PumpCoil , Discharge:=GVL.DischargeVlve , Level=&gt;GVL.Level_PV );
+	IF GVL.AutoMode THEN
+		OnOff_cont_01(Feedback:=GVL.Level_PV , Setpoint:=GVL.Level_Sp , Hyst:=GVL.Hyst , ControlSig=&gt;GVL.PumpCoil );
+	END_IF
+ELSE
+    // Safe stop: Turn off actuators, hold level (no sim updates)
+    GVL.PumpCoil := FALSE;
+    GVL.DischargeVlve := FALSE;  // Assuming you want to close discharge too—adjust if it's a leak sim.
+    // Optional: Reset level to 0 or SP on stop? Uncomment if needed.
+    // GVL.Level_PV := 0.0;  // Or GVL.Level_Sp;
+END_IF;</xhtml>
+                  </ST>
+                </body>
+                <addData>
+                  <data name="http://www.3s-software.com/plcopenxml/objectid" handleUnknown="discard">
+                    <ObjectId>f8f327a2-0df3-4f5d-a17e-54b0e9f21db0</ObjectId>
+                  </data>
+                </addData>
+              </pou>
+            </data>
+            <data name="http://www.3s-software.com/plcopenxml/pou" handleUnknown="implementation">
+              <pou name="Level_Sim" pouType="functionBlock">
+                <interface>
+                  <inputVars>
+                    <variable name="Charge">
+                      <type>
+                        <BOOL />
+                      </type>
+                    </variable>
+                    <variable name="Discharge">
+                      <type>
+                        <BOOL />
+                      </type>
+                    </variable>
+                  </inputVars>
+                  <outputVars>
+                    <variable name="Level">
+                      <type>
+                        <REAL />
+                      </type>
+                    </variable>
+                  </outputVars>
+                  <localVars>
+                    <variable name="Blink_Charge">
+                      <type>
+                        <derived name="Blink" />
+                      </type>
+                    </variable>
+                    <variable name="Blink_Discharge">
+                      <type>
+                        <derived name="Blink" />
+                      </type>
+                    </variable>
+                    <variable name="Charge_RE">
+                      <type>
+                        <derived name="R_trig" />
+                      </type>
+                    </variable>
+                    <variable name="DisCharge_RE">
+                      <type>
+                        <derived name="R_trig" />
+                      </type>
+                    </variable>
+                  </localVars>
+                </interface>
+                <body>
+                  <ST>
+                    <xhtml xmlns="http://www.w3.org/1999/xhtml">// Charging simulator
+Blink_Charge(ENABLE:=Charge , TIMELOW:=T#100MS , TIMEHIGH:=T#100MS , OUT=&gt; );
+Charge_RE(CLK:= Blink_Charge.OUT, Q=&gt; );
+IF Charge_RE.Q THEN
+	Level:= Level+0.4;
+END_IF
+// Discharging simulator
+Blink_Discharge(ENABLE:= Discharge , TIMELOW:=T#100MS , TIMEHIGH:=T#100MS , OUT=&gt; );
+DisCharge_RE(CLK:=Blink_Discharge.OUT , Q=&gt; );
+IF DisCharge_RE.Q THEN
+	Level:= Level-0.1;
+END_IF
+// in this case rate of charging in bigger than discharge
+IF Level&lt;0 THEN
+	Level:=0;
+END_IF
+IF  Level &gt; 100 THEN
+	Level:=100;
+END_IF
+
+
+</xhtml>
+                  </ST>
+                </body>
+                <addData>
+                  <data name="http://www.3s-software.com/plcopenxml/objectid" handleUnknown="discard">
+                    <ObjectId>01eff67c-649d-4ca9-bf47-e619b23c5d49</ObjectId>
+                  </data>
+                </addData>
+              </pou>
+            </data>
+            <data name="http://www.3s-software.com/plcopenxml/pou" handleUnknown="implementation">
+              <pou name="OnOff_Control" pouType="functionBlock">
+                <interface>
+                  <inputVars>
+                    <variable name="Feedback">
+                      <type>
+                        <REAL />
+                      </type>
+                    </variable>
+                    <variable name="Setpoint">
+                      <type>
+                        <REAL />
+                      </type>
+                    </variable>
+                    <variable name="Hyst">
+                      <type>
+                        <REAL />
+                      </type>
+                    </variable>
+                  </inputVars>
+                  <outputVars>
+                    <variable name="ControlSig">
+                      <type>
+                        <BOOL />
+                      </type>
+                    </variable>
+                  </outputVars>
+                </interface>
+                <body>
+                  <ST>
+                    <xhtml xmlns="http://www.w3.org/1999/xhtml">IF feedback&gt;Setpoint+Hyst/2 THEN
+	ControlSig:=FALSE;
+ELSIF feedback&lt;Setpoint-Hyst/2 THEN
+		ControlSig:=TRUE;
+END_IF</xhtml>
+                  </ST>
+                </body>
+                <addData>
+                  <data name="http://www.3s-software.com/plcopenxml/objectid" handleUnknown="discard">
+                    <ObjectId>8ee0635b-ae0e-4c59-b3fa-8ce518dcbf53</ObjectId>
+                  </data>
+                </addData>
+              </pou>
+            </data>
+            <data name="http://www.3s-software.com/plcopenxml/libraries" handleUnknown="implementation">
+              <Libraries>
+                <Library Name="#IoStandard" Namespace="IoStandard" HideWhenReferencedAsDependency="false" PublishSymbolsInContainer="false" SystemLibrary="true" LinkAllContent="true" DefaultResolution="IoStandard, 3.5.17.0 (System)" />
+                <Library Name="#3SLicense" Namespace="_3S_LICENSE" HideWhenReferencedAsDependency="false" PublishSymbolsInContainer="false" SystemLibrary="true" LinkAllContent="false" DefaultResolution="3SLicense, 0.0.0.0 (CODESYS)" ResolverGuid="97c3b452-d9fa-4ac2-9d0c-3d420aa6d95b" />
+                <Library Name="#CAA Device Diagnosis" Namespace="DED" HideWhenReferencedAsDependency="false" PublishSymbolsInContainer="false" SystemLibrary="true" LinkAllContent="false" DefaultResolution="CAA Device Diagnosis, 3.5.21.0 (CAA Technical Workgroup)" />
+                <Library Name="#Standard" Namespace="Standard" HideWhenReferencedAsDependency="false" PublishSymbolsInContainer="false" SystemLibrary="false" LinkAllContent="false" DefaultResolution="Standard, * (System)" />
+                <Library Name="#BreakpointLogging" Namespace="BPLog" HideWhenReferencedAsDependency="false" PublishSymbolsInContainer="false" SystemLibrary="true" LinkAllContent="false" DefaultResolution="Breakpoint Logging Functions, * (3S - Smart Software Solutions GmbH)" />
+                <Library Name="#Util" Namespace="Util" HideWhenReferencedAsDependency="false" PublishSymbolsInContainer="false" SystemLibrary="false" LinkAllContent="false" DefaultResolution="Util, * (System)" />
+                <Library Name="#IecVarAccess" Namespace="IecVarAccessLibrary" HideWhenReferencedAsDependency="false" PublishSymbolsInContainer="false" SystemLibrary="true" LinkAllContent="false" DefaultResolution="IecVarAccess, 3.3.1.20 (System)" />
+                <Library Name="#CmpOPCUAServer" Namespace="CmpOPCUAServer" HideWhenReferencedAsDependency="false" PublishSymbolsInContainer="false" SystemLibrary="false" LinkAllContent="false" DefaultResolution="CmpOPCUAServer, * (System)" />
+                <PlaceholderRedirections>
+                  <PlaceholderRedirection Placeholder="Standard" Redirection="Standard, 3.5.18.0 (System)" />
+                  <PlaceholderRedirection Placeholder="StringUtils" Redirection="StringUtils, 3.5.20.0 (System)" />
+                  <PlaceholderRedirection Placeholder="Util" Redirection="Util, 3.5.21.0 (System)" />
+                  <PlaceholderRedirection Placeholder="Collections" Redirection="Collections, 3.5.17.0 (System)" />
+                </PlaceholderRedirections>
+                <addData>
+                  <data name="http://www.3s-software.com/plcopenxml/objectid" handleUnknown="discard">
+                    <ObjectId>7348963d-e092-433c-9f30-98c864625c05</ObjectId>
+                  </data>
+                </addData>
+              </Libraries>
+            </data>
+            <data name="http://www.3s-software.com/plcopenxml/objectid" handleUnknown="discard">
+              <ObjectId>1c1c75db-eaae-42c7-b7c1-d21360478b2a</ObjectId>
+            </data>
+          </addData>
+        </resource>
+        <addData>
+          <data name="Device" handleUnknown="discard">
+            <Device xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="">
+              <DeviceType>
+                <DeviceIdentification>
+                  <Type>4096</Type>
+                  <Id>0000 0004</Id>
+                  <Version>3.5.21.30</Version>
+                </DeviceIdentification>
+                <Connector moduleType="256" interface="Common.PCI" connectorId="0">
+                  <HostParameterSet />
+                </Connector>
+                <Connector moduleType="769" interface="SafetyInterface" connectorId="1">
+                  <HostParameterSet />
+                </Connector>
+                <DeviceParameterSet />
+              </DeviceType>
+            </Device>
+          </data>
+          <data name="configurations" handleUnknown="discard">
+            <configurations />
+          </data>
+          <data name="http://www.3s-software.com/plcopenxml/objectid" handleUnknown="discard">
+            <ObjectId>751e7587-1f36-46bd-8a0d-27ec8db9839c</ObjectId>
+          </data>
+        </addData>
+      </configuration>
+    </configurations>
+  </instances>
+  <addData>
+    <data name="http://www.3s-software.com/plcopenxml/projectstructure" handleUnknown="discard">
+      <ProjectStructure>
+        <Object Name="Device" ObjectId="751e7587-1f36-46bd-8a0d-27ec8db9839c">
+          <Object Name="Application" ObjectId="1c1c75db-eaae-42c7-b7c1-d21360478b2a">
+            <Object Name="Library Manager" ObjectId="7348963d-e092-433c-9f30-98c864625c05" />
+            <Object Name="PLC_PRG" ObjectId="f8f327a2-0df3-4f5d-a17e-54b0e9f21db0" />
+            <Object Name="MainTask" ObjectId="37491117-16c6-473d-bd44-c46301e7978c" />
+            <Object Name="GVL" ObjectId="a684c113-33eb-437c-9fd6-a2abbc8496c4" />
+            <Object Name="Level_Sim" ObjectId="01eff67c-649d-4ca9-bf47-e619b23c5d49" />
+            <Object Name="OnOff_Control" ObjectId="8ee0635b-ae0e-4c59-b3fa-8ce518dcbf53" />
+          </Object>
+        </Object>
+      </ProjectStructure>
+    </data>
+  </addData>
+</project>
